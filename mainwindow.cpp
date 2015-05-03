@@ -7,10 +7,11 @@ MainWindow::MainWindow(QWidget *parent) :
     standart(new StandartWidget(this))
 {
     ui->setupUi(this);
+    qDebug() << sizeof(char);
     //ui->standartGame->addWidget(standart);
-    qDebug() << "start genetic algorithm";
-    Genetic g;
-    qDebug() << "end geentic algorithm";
+//    qDebug() << "start genetic algorithm";
+//    Genetic g;
+//    qDebug() << "end geentic algorithm";
 }
 
 MainWindow::~MainWindow()

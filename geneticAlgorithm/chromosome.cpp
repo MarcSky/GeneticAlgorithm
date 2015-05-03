@@ -10,35 +10,38 @@ Chromosome::~Chromosome() {
 
 }
 
-double Chromosome::getFitness(void) {
-    return fitness;
-}
+//double Chromosome::getFitness(void) {
+//    return fitness;
+//}
 
-void Chromosome::setFitness(double f) {
-    fitness = f;
-}
+//void Chromosome::setFitness(double f) {
+//    fitness = f;
+//}
 
 void Chromosome::initRandomeBits(void) {
-    for (int i = 0; i < CHROMOSOME_SIZE - 1; i++) {
-        char x = (qrand() % 2) ? '1' : '0';
-        bits += x;
-    }
+//    for (int i = 0; i < CHROMOSOME_SIZE - 1; i++) {
+//        char x = (qrand() % 2) ? '1' : '0';
+//        bits += x;
+//    }
+//    x = qrand() % WIDTHBOARD;
+//    y = qrand() % HEIGTBOARD;
 }
 
-void Chromosome::setBits(const QString b) {
-    bits = b;
-}
+//void Chromosome::setBits(const QString b) {
+////    bits = b;
+//}
 
-QString Chromosome::getBits(void) {
-    return bits;
-}
+//QString Chromosome::getBits(void) {
+//    return "bits";
+//}
 
 void Chromosome::calcFitness(void) {
     //x2+x
-    int value = getNumber();
-    fitness = 1.0 * (value * value + value);
+//    int value = getNumber();
+//    fitness = 1.0 * (value * value + value);
+    fitness = 0.0f;
 }
 
-int Chromosome::getNumber(void) {
-   return bits.toInt(0, 2);
-}
+//int Chromosome::getNumber(void) {
+//   return 0;//bits.toInt(0, 2);
+//}

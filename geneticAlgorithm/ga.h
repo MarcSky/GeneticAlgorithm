@@ -2,7 +2,6 @@
 #define GA_H
 #include <QtCore>
 #include "chromosome.h"
-#define POPULATION_SIZE 2500
 
 class Genetic
 {
@@ -20,7 +19,8 @@ private:
     QList<Chromosome> *population;
     void roulette();
     void crossover(void);
-    void mutate(void);
+    void mutate(Chromosome *c);
+    void crossover(Chromosome *a, Chromosome *b);
     float getTotalFitness(void);
 };
 

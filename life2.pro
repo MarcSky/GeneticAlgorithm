@@ -14,13 +14,11 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     standartwidget.cpp \
-    geneticwidget.cpp \
     geneticAlgorithm/ga.cpp \
     geneticAlgorithm/chromosome.cpp
 
 HEADERS  += mainwindow.h \
     standartwidget.h \
-    geneticwidget.h \
     geneticAlgorithm/ga.h \
     geneticAlgorithm/chromosome.h
 
