@@ -63,7 +63,7 @@
       <string>Пауза</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="restartButton">
+    <widget class="QPushButton" name="stopButton">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -73,7 +73,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Рестарт</string>
+      <string>СТОП</string>
      </property>
     </widget>
    </widget>

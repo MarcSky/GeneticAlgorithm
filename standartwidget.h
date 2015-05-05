@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMessageBox>
+#include "geneticAlgorithm/ga.h"
 
 class StandartWidget : public QWidget
 {
@@ -15,17 +16,24 @@ class StandartWidget : public QWidget
 public:
     explicit StandartWidget(QWidget *parent = 0);
     ~StandartWidget();
+    double totalFitness;
+    void roulette();
+    void crossover(void);
+    void mutate(Chromosome *c);
+    void crossover(Chromosome *d, Chromosome *a, Chromosome *b);
+
+    float getTotalFitness(void);
+    void newGeneration(Chromosome *pool);
 
 signals:
 
 private slots:
     void paintGrid(QPainter &p);
     void paintUniverse(QPainter &p);
-    void newGeneration();
-
+    void run(void);
 
 public slots:
-    void startGame(const int &number = -1); // start
+    void startGame(); // start
     void stopGame(); // finish
     void clear(); // clear
 
@@ -33,14 +41,14 @@ protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    int universeSize;
-    bool* universe; // map
-    bool* next; // map
-    QTimer * timer;
+    QTimer *timer;
     int generations;
     bool isAlive(int k, int j);
     void resetUniverse();// reset the size of universe
-
+    bool stopFlag;
+    bool *currentMap;
+    bool *nextMap;
+    Chromosome *population;
 };
 
 #endif // STANDARTWIDGET_H
