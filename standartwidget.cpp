@@ -1,5 +1,6 @@
 #include "standartwidget.h"
 #include <iostream>
+#include <stdlib.h>
 StandartWidget::StandartWidget(QWidget *parent) :
     QWidget(parent),
     timer(new QTimer(this))
@@ -12,7 +13,7 @@ StandartWidget::StandartWidget(QWidget *parent) :
     memset(currentMap, false, sizeof(bool)*(BOARD_WIDTH + 2) * (BOARD_HEIGHT + 2));
     memset(nextMap, false, sizeof(bool)*(BOARD_WIDTH + 2) * (BOARD_HEIGHT + 2));
     timer->setInterval(1000);
-    connect(timer, SIGNAL(timeout()), this, SLOT(run()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(newGeneration()));
 
 //
 }
@@ -65,8 +66,8 @@ void StandartWidget::paintUniverse(QPainter &p)
 {
     double cellWidth = (double)width()/BOARD_WIDTH;
     double cellHeight = (double)height()/BOARD_HEIGHT;
-    for(int k=0; k < BOARD_WIDTH; k++) {
-        for(int j=0; j <BOARD_HEIGHT; j++) {
+    for(int k=1; k <= BOARD_WIDTH; k++) {
+        for(int j=1; j <= BOARD_HEIGHT; j++) {
             if(currentMap[k*BOARD_HEIGHT + j]) { // if there is any sense to paint it
                 qreal left = (qreal)(cellWidth*j-cellWidth); // margin from left
                 qreal top  = (qreal)(cellHeight*k-cellHeight); // margin from top
@@ -77,42 +78,87 @@ void StandartWidget::paintUniverse(QPainter &p)
     }
 }
 
-void StandartWidget::newGeneration(Chromosome *pool){
-    qDebug() << "~~~~~~~~~~~New generations~~~~~~~~~~~~~~~";
-    int notChanged=0;
-    int a=  pool[0].x;
-    int b=  pool[0].y;
-    for(int k=1; k <= BOARD_HEIGHT; k++) {
-        for(int j=1; j <= BOARD_WIDTH; j++) {
-            if(pool[(k-1)*BOARD_WIDTH + (j-1)].x < BOARD_WIDTH && pool[(k-1)*BOARD_WIDTH + (j-1)].y < BOARD_HEIGHT) {
+void StandartWidget::newGeneration(){
 
-                currentMap[k*BOARD_WIDTH + j] = true;
+    Chromosome data[POPULATION_SIZE * POPULATION_SIZE];
 
+        for(int i = 0; i < POPULATION_SIZE; i++){
+            for(int j = 0; j < POPULATION_SIZE; j++) {
+                crossover(&data[i * POPULATION_SIZE + j], &population[i], &population[j]);
+                mutate(&data[i * POPULATION_SIZE + j]);
+                qDebug() << "~~~~~~~~~~~New generations~~~~~~~~~~~~~~~";
+                int notChanged=0;
+                int fitness = 0;
+                for(int k=1; k <= BOARD_HEIGHT; k++) {
+                    for(int j=1; j <= BOARD_WIDTH; j++) {
+                        if(data[i * POPULATION_SIZE + j].map[k * BOARD_WIDTH + j]) {
+                            currentMap[k*BOARD_WIDTH + j] = true;
+                        }
+                    }
+                }
+
+                for(int k= 1 ; k <= BOARD_HEIGHT; k++) {
+                    for(int j = 1; j <= BOARD_WIDTH; j++) {
+
+                        nextMap[k * BOARD_WIDTH + j] = isAlive(k,j);
+                        if(nextMap[k * POPULATION_SIZE + j] == currentMap[k* POPULATION_SIZE + j])
+                            notChanged++;
+                    }
+                }
+
+                if(notChanged == POPULATION_SIZE) {
+                    stopFlag = true;
+                    qDebug() << "=================Game is off================";
+                }
+
+                for(int k=1; k <= BOARD_HEIGHT; k++) {
+                    for(int j=1; j <= BOARD_WIDTH; j++) {
+                        if(nextMap[k*BOARD_WIDTH + j]) fitness++;
+                        currentMap[k*BOARD_WIDTH + j] = nextMap[k*BOARD_WIDTH + j];
+                    }
+                }
+
+                data[i * POPULATION_SIZE + j].fitness = fitness;
+
+                update();
             }
         }
-    }
 
-    for(int y = 1 ; y < BOARD_HEIGHT; y++) {
-        for(int x = 1; x < BOARD_WIDTH; x++) {
+//    qDebug() << "~~~~~~~~~~~New generations~~~~~~~~~~~~~~~";
+//    int notChanged=0;
+//    int fitness = 0;
+//    for(int k=1; k <= BOARD_HEIGHT; k++) {
+//        for(int j=1; j <= BOARD_WIDTH; j++) {
+//            if(data.map[k * BOARD_WIDTH + j]) {
+//                currentMap[k*BOARD_WIDTH + j] = true;
+//            }
+//        }
+//    }
 
-            nextMap[y * BOARD_WIDTH + x] = isAlive(y,x);
-            if(nextMap[y * POPULATION_SIZE + x] == currentMap[y * POPULATION_SIZE + x])
-                notChanged++;
-        }
-    }
+//    for(int k= 1 ; k <= BOARD_HEIGHT; k++) {
+//        for(int j = 1; j <= BOARD_WIDTH; j++) {
 
-    if(notChanged == POPULATION_SIZE) {
-        stopFlag = true;
-        qDebug() << "=================Game is off================";
-    }
+//            nextMap[k * BOARD_WIDTH + j] = isAlive(k,j);
+//            if(nextMap[k * POPULATION_SIZE + j] == currentMap[k* POPULATION_SIZE + j])
+//                notChanged++;
+//        }
+//    }
 
-    for(int k=1; k <= BOARD_HEIGHT; k++) {
-        for(int j=1; j <= BOARD_WIDTH; j++) {
-            currentMap[k*BOARD_WIDTH + j] = nextMap[k*BOARD_WIDTH + j];
-        }
-    }
+//    if(notChanged == POPULATION_SIZE) {
+//        stopFlag = true;
+//        qDebug() << "=================Game is off================";
+//    }
 
-    update();
+//    for(int k=1; k <= BOARD_HEIGHT; k++) {
+//        for(int j=1; j <= BOARD_WIDTH; j++) {
+//            if(nextMap[k*BOARD_WIDTH + j]) fitness++;
+//            currentMap[k*BOARD_WIDTH + j] = nextMap[k*BOARD_WIDTH + j];
+//        }
+//    }
+
+//    pool->fitness = fitness;
+
+//    update();
 }
 
 
@@ -152,17 +198,27 @@ void StandartWidget::clear()
 }
 
 void StandartWidget::mutate(Chromosome *c) {
-    int rate = qrand()%100;
-    if (rate > MUTATE_RATE) {
-        unsigned char bit = qrand() % (sizeof(char) * 8);
-        c->x = (~(c->x << bit));
-        c->y = (~(c->y << bit));
+//    int rate = qrand()%100;
+//    if (rate > MUTATE_RATE) {
+//        unsigned char bit = qrand() % (sizeof(char) * 8);
+//        c->x = (~(c->x << bit));
+//        c->y = (~(c->y << bit));
+//    }
+    for(int k = 1; k <= BOARD_HEIGHT; k++) {
+        for(int j = 1; j <= BOARD_WIDTH; j++) {
+            if (qrand()%100 > MUTATE_RATE) {
+                c->map[k*BOARD_WIDTH + j]=!c->map[k*BOARD_WIDTH + j];
+            }
+        }
     }
 }
 
 void StandartWidget::crossover(Chromosome *d, Chromosome *a, Chromosome *b) {
-    unsigned char crosspointX = qrand() % (sizeof(char) * 8);
-    unsigned char crosspointY = qrand() % (sizeof(char) * 8);
+//    unsigned char crosspointX = qrand() % (sizeof(char) * 8);
+//    unsigned char crosspointY = qrand() % (sizeof(char) * 8);
+      int crosspoint = qrand() % (POPULATION_SIZE * POPULATION_SIZE);
+      memcpy(d->map,a->map,crosspoint*sizeof(d->map[0]));
+      memcpy(&(d->map[crosspoint]),&(b->map[crosspoint]),(POPULATION_SIZE * POPULATION_SIZE-crosspoint)*sizeof(d->map[0]));
 
 //    Chromosome *temp;
 
@@ -173,59 +229,62 @@ void StandartWidget::crossover(Chromosome *d, Chromosome *a, Chromosome *b) {
 //    }
 
     //=====Координата X
-    unsigned int iMask = 1;
-    iMask <<=crosspointX;
-    iMask -= iMask;
+//    unsigned int iMask = 1;
+//    iMask <<=crosspointX;
+//    iMask -= iMask;
 
-    unsigned int iChrom1_end = a->x & iMask;
-    unsigned int iChrom2_end = b->x & iMask;
+//    unsigned int iChrom1_end = a->x & iMask;
+//    unsigned int iChrom2_end = b->x & iMask;
 
-    unsigned int iMask2 = ~iMask;
-    a->x &= iMask2;
-    b->x &= iMask2;
+//    unsigned int iMask2 = ~iMask;
+//    a->x &= iMask2;
+//    b->x &= iMask2;
 
-    a->x |= iChrom2_end;
-    b->x |= iChrom1_end;
+//    a->x |= iChrom2_end;
+//    b->x |= iChrom1_end;
 
-    //=====Координата Y
-    iMask = 1;
-    iMask <<=crosspointY;
-    iMask -= iMask;
+//    //=====Координата Y
+//    iMask = 1;
+//    iMask <<=crosspointY;
+//    iMask -= iMask;
 
-    iChrom1_end = a->y & iMask;
-    iChrom2_end = b->y & iMask;
+//    iChrom1_end = a->y & iMask;
+//    iChrom2_end = b->y & iMask;
 
-    iMask2 = ~iMask;
-    a->y &= iMask2;
-    b->y &= iMask2;
+//    iMask2 = ~iMask;
+//    a->y &= iMask2;
+//    b->y &= iMask2;
 
-    a->y |= iChrom2_end;
-    b->y |= iChrom1_end;
+//    a->y |= iChrom2_end;
+//    b->y |= iChrom1_end;
 
-    d->x = a->x;
-    d->y = a->y;
+//    d->x = a->x;
+//    d->y = a->y;
+
+
 
 }
 
+int gene_cmp(const void *a,const void *b) {
+    return ((Chromosome *)b)->fitness-((Chromosome *)a)->fitness;
+}
 
 
 void StandartWidget::run(void) {
     Chromosome data[POPULATION_SIZE * POPULATION_SIZE];
 
-//    while(!stopFlag) {
         for(int i = 0; i < POPULATION_SIZE; i++){
             for(int j = 0; j < POPULATION_SIZE; j++) {
-
-
                 crossover(&data[i * POPULATION_SIZE + j], &population[i], &population[j]);
-
                 mutate(&data[i * POPULATION_SIZE + j]);
-                newGeneration(data);
-
+//                newGeneration(data);
             }
         }
-//        stopFlag = true;
-//    }
+        qDebug() << "close" << qrand()%100;
+        //        qsort((void *)data,POPULATION_SIZE * POPULATION_SIZE,sizeof(Chromosome),gene_cmp);
+//        for(int i = 0; i < POPULATION_SIZE; i++) {
+//            qDebug()<<data[i].fitness;
+//        }
 }
 
 

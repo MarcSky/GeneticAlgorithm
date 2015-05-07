@@ -23,7 +23,6 @@ public:
     void crossover(Chromosome *d, Chromosome *a, Chromosome *b);
 
     float getTotalFitness(void);
-    void newGeneration(Chromosome *pool);
 
 signals:
 
@@ -31,6 +30,8 @@ private slots:
     void paintGrid(QPainter &p);
     void paintUniverse(QPainter &p);
     void run(void);
+    void newGeneration();
+
 
 public slots:
     void startGame(); // start
