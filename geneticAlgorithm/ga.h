@@ -16,9 +16,12 @@ public:
 //    unsigned int x, y;
     bool map[(BOARD_WIDTH+2) * (BOARD_HEIGHT+2)];
     int fitness;
-    Chromosome operator=(Chromosome const &b) {
-//        this->x = b.x;
-//        this->y = b.y;
+
+    Chromosome& operator=(Chromosome const &b) {
+        if( this != &b){
+            memcpy(map,b.map,BOARD_WIDTH * BOARD_HEIGHT);
+        }
+        return *this;
     }
 
 private:

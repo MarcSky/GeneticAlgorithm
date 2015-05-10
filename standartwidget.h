@@ -50,6 +50,8 @@ private:
     bool *currentMap;
     bool *nextMap;
     Chromosome *population;
+    int bestFitness;
+    Chromosome bestChromosome;
 };
 
 #endif // STANDARTWIDGET_H

@@ -14,13 +14,14 @@ StandartWidget::StandartWidget(QWidget *parent) :
     memset(nextMap, false, sizeof(bool)*(BOARD_WIDTH + 2) * (BOARD_HEIGHT + 2));
     timer->setInterval(1000);
     connect(timer, SIGNAL(timeout()), this, SLOT(newGeneration()));
-
+    bestFitness = 0;
+//    newGeneration();
 //
 }
 
 StandartWidget::~StandartWidget()
 {
-    delete population;
+    delete [] population;
     delete [] currentMap;
     delete [] nextMap;
 }
@@ -82,7 +83,7 @@ void StandartWidget::newGeneration(){
 
     Chromosome data[POPULATION_SIZE * POPULATION_SIZE];
 
-        for(int i = 0; i < POPULATION_SIZE; i++){
+        for(int i = 0; i < POPULATION_SIZE; i++) {
             for(int j = 0; j < POPULATION_SIZE; j++) {
                 crossover(&data[i * POPULATION_SIZE + j], &population[i], &population[j]);
                 mutate(&data[i * POPULATION_SIZE + j]);
@@ -101,7 +102,7 @@ void StandartWidget::newGeneration(){
                     for(int j = 1; j <= BOARD_WIDTH; j++) {
 
                         nextMap[k * BOARD_WIDTH + j] = isAlive(k,j);
-                        if(nextMap[k * POPULATION_SIZE + j] == currentMap[k* POPULATION_SIZE + j])
+                        if(nextMap[k * POPULATION_SIZE + j] == currentMap[k * POPULATION_SIZE + j])
                             notChanged++;
                     }
                 }
@@ -109,17 +110,21 @@ void StandartWidget::newGeneration(){
                 if(notChanged == POPULATION_SIZE) {
                     stopFlag = true;
                     qDebug() << "=================Game is off================";
+                    stopGame();
                 }
 
                 for(int k=1; k <= BOARD_HEIGHT; k++) {
                     for(int j=1; j <= BOARD_WIDTH; j++) {
-                        if(nextMap[k*BOARD_WIDTH + j]) fitness++;
-                        currentMap[k*BOARD_WIDTH + j] = nextMap[k*BOARD_WIDTH + j];
+                        if(nextMap[k * BOARD_WIDTH + j]) fitness++;
+                        currentMap[k * BOARD_WIDTH + j] = nextMap[k * BOARD_WIDTH + j];
                     }
                 }
 
                 data[i * POPULATION_SIZE + j].fitness = fitness;
-
+                if(fitness > bestFitness) {
+                    bestFitness = fitness;
+                    bestChromosome = data[i * POPULATION_SIZE + j];
+                }
                 update();
             }
         }
@@ -184,6 +189,14 @@ void StandartWidget::stopGame()
 {
 //    gameFlag = true;
     timer->stop();
+    qDebug() << bestFitness;
+    for(int k = 1; k <= BOARD_HEIGHT; k++) {
+        for(int j = 1; j <= BOARD_WIDTH; j++) {
+            currentMap[k*BOARD_WIDTH + j] = bestChromosome.map[k*BOARD_WIDTH + j];
+        }
+    }
+    update();
+
 }
 
 void StandartWidget::clear()
@@ -275,12 +288,12 @@ void StandartWidget::run(void) {
 
         for(int i = 0; i < POPULATION_SIZE; i++){
             for(int j = 0; j < POPULATION_SIZE; j++) {
-                crossover(&data[i * POPULATION_SIZE + j], &population[i], &population[j]);
-                mutate(&data[i * POPULATION_SIZE + j]);
+//                crossover(&data[i * POPULATION_SIZE + j], &population[i], &population[j]);
+//                mutate(&data[i * POPULATION_SIZE + j]);
 //                newGeneration(data);
             }
         }
-        qDebug() << "close" << qrand()%100;
+//        qDebug() << "close" << qrand()%100;
         //        qsort((void *)data,POPULATION_SIZE * POPULATION_SIZE,sizeof(Chromosome),gene_cmp);
 //        for(int i = 0; i < POPULATION_SIZE; i++) {
 //            qDebug()<<data[i].fitness;
