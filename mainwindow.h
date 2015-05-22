@@ -5,7 +5,6 @@
 #include <QtCore>
 #include <QtGui>
 #include "standartwidget.h"
-#include "geneticAlgorithm/ga.h"
 namespace Ui {
 class MainWindow;
 }

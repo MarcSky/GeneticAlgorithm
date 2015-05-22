@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Game of Life by Levan Gogohia</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="layoutWidget">
@@ -84,7 +84,7 @@
      <x>0</x>
      <y>0</y>
      <width>589</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

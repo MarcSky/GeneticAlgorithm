@@ -13,18 +13,17 @@ class Chromosome
 public:
     Chromosome();
     ~Chromosome();
-//    unsigned int x, y;
     bool map[(BOARD_WIDTH+2) * (BOARD_HEIGHT+2)];
     int fitness;
 
     Chromosome& operator=(Chromosome const &b) {
         if( this != &b){
-            memcpy(map,b.map,BOARD_WIDTH * BOARD_HEIGHT);
+            memcpy(&map,&(b.map),sizeof(bool) * BOARD_WIDTH * BOARD_HEIGHT);
         }
         return *this;
     }
-
 private:
-
 };
+
+
 #endif // GA_H
